@@ -26,8 +26,7 @@ SECRET_KEY = 'django-insecure-fwgqmnmqc%kw$$+_19g*jo5(!uk$(llnknen$k7$q)zen$7!sx
 DEBUG = True
 
 # ALLOWED_HOSTS = ['172.20.10.9','192.168.2.169','192.168.137.1','127.0.0.1','192.168.43.48','192.168.1.10','192.168.137.1','192.168.1.5','192.168.1.8','192.168.1.3','192.168.1.7','192.168.1.6','192.168.14.48','192.168.137.1','192.168.131.207','10.103.250.181','localhost'] 
-
-ALLOWED_HOSTS = ['itxakib.pythonanywhere.com']
+ALLOWED_HOSTS = ['*'] 
 # Application definition
 
 INSTALLED_APPS = [
