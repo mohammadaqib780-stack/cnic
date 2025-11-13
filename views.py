@@ -133,27 +133,21 @@
 
 
 
-
 # views.py
 import base64
 import re
 import cv2
 import numpy as np
 import pytesseract
-import face_recognition
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-import traceback
-import requests
 
-# Set Tesseract path (Windows)
-# pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+# Use Linux path for Tesseract (for Render/Heroku)
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
-
 def _b64_to_cv2_img(b64string):
-    """Remove header if present and decode base64 to OpenCV BGR image."""
+    """Convert Base64 string to OpenCV BGR image."""
     if not b64string:
         return None
     if "," in b64string:
@@ -166,12 +160,10 @@ def _b64_to_cv2_img(b64string):
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
     return img
 
-
 class CNICVerificationView(APIView):
     """
-    Accepts JSON { "image": "data:image/jpeg;base64,..." }
-    Uses Tesseract OCR to extract text and crop the CNIC photo area (keeps your crop logic).
-    Returns: extracted_text, valid(bool), cnic_number, name, face_image (base64 of crop)
+    Accepts JSON: { "image": "data:image/jpeg;base64,..." }
+    Returns extracted text, CNIC number, name, and cropped face image (Base64).
     """
     def post(self, request):
         try:
@@ -185,7 +177,6 @@ class CNICVerificationView(APIView):
 
             # ---------- OCR with pytesseract ----------
             gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-            # small denoise + threshold can improve results; keep minimal to avoid heavy memory
             gray = cv2.medianBlur(gray, 3)
             extracted_text = pytesseract.image_to_string(gray, config='--psm 6')  # single block
 
@@ -202,18 +193,19 @@ class CNICVerificationView(APIView):
                         name = lines[i + 1].strip()
                     break
 
-            # ---------- Crop CNIC photo area (UNCHANGED from your logic) ----------
+            # ---------- Crop CNIC photo using OpenCV bounding ----------
             height, width, _ = image.shape
-            x1, y1 = int(width * 0.7), int(height * 0.25)    # top-left corner (right side, lower)
-            x2, y2 = int(width * 0.95), int(height * 0.70)   # bottom-right corner
+            x1, y1 = int(width * 0.7), int(height * 0.25)    # top-left
+            x2, y2 = int(width * 0.95), int(height * 0.70)   # bottom-right
             face_crop = image[y1:y2, x1:x2]
 
-            # If cropping fails (out of bounds) fallback to small center crop
+            # Fallback if crop fails
             if face_crop is None or face_crop.size == 0:
                 ch, cw = height // 4, width // 4
-                face_crop = image[height//2 - ch//2: height//2 + ch//2, width//2 - cw//2: width//2 + cw//2]
+                face_crop = image[height//2 - ch//2: height//2 + ch//2,
+                                  width//2 - cw//2: width//2 + cw//2]
 
-            # Encode cropped photo as Base64 (no header)
+            # Encode cropped photo as Base64
             _, buffer = cv2.imencode('.jpg', face_crop, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
             face_image_b64 = base64.b64encode(buffer).decode('utf-8')
 
@@ -222,7 +214,7 @@ class CNICVerificationView(APIView):
                 "valid": bool(cnic_number),
                 "cnic_number": cnic_number,
                 "name": name,
-                "face_image": face_image_b64,   # NOTE: base64 without data: prefix
+                "face_image": face_image_b64,
                 "error": None if cnic_number else "CNIC number not found"
             }, status=status.HTTP_200_OK)
 
@@ -235,6 +227,11 @@ class CNICVerificationView(APIView):
                 "face_image": None,
                 "error": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
 
 
     
