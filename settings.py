@@ -13,7 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,7 +27,8 @@ SECRET_KEY = 'django-insecure-fwgqmnmqc%kw$$+_19g*jo5(!uk$(llnknen$k7$q)zen$7!sx
 DEBUG = True
 
 # ALLOWED_HOSTS = ['172.20.10.9','192.168.2.169','192.168.137.1','127.0.0.1','192.168.43.48','192.168.1.10','192.168.137.1','192.168.1.5','192.168.1.8','192.168.1.3','192.168.1.7','192.168.1.6','192.168.14.48','192.168.137.1','192.168.131.207','10.103.250.181','localhost'] 
-ALLOWER_HOSTS=["*"]
+ALLOWED_HOSTS = ["*"]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -53,7 +55,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 CORS_ALLOW_ALL_ORIGINS = True
-ROOT_URLCONF = 'homexbackend.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -70,7 +72,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'homexbackend.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
+
 
 
 # Database
