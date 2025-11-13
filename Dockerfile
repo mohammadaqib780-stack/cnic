@@ -20,4 +20,4 @@ RUN pip install -r requirements.txt
 EXPOSE 8080
 
 # Start Django app with gunicorn
-CMD ["gunicorn", "wsgi:application", "-b", "0.0.0.0:8080"]
+CMD ["gunicorn", "homexbackend.wsgi.application", "-b", "0.0.0.0:8080"]
